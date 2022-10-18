@@ -116,8 +116,65 @@ class Disk(object):
                          texcoords = None,
                          sceneObj = self)
 
+# Referencias ejecución de triangulo 
+#https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection
+# https://docs.pyvista.org/examples/99-advanced/ray-trace-moeller.html codigo compartido en el discord
+#https://www.erikrotteveel.com/python/three-dimensional-ray-tracing-in-python/
 
 
+class Triangle(object):
+    # break down triangle into the individual points
+    def __init__(self, a, b, c, material):
+        self.a = a #v1
+        self.b = b #v2
+        self.c = c #v3
+        self.material = material
+        
+# compute edges
+    #edge1 = v2 - v1
+    #edge2 = v3 - v1
+    #pvec = np.cross(ray_vec, edge2)
+    #det = edge1.dot(pvec)
+    def ray(self, orig, dir): #def intersectionRayModel(self, rayStart, rayEnd):
+        edge1 = np.substract(self.b, self.a)
+        edge2 = np.substract(self.c, self.a)
+        
+        normal = np.cross(edge1, edge2)
+        
+        #pvec = np.cross(ray_vec, edge2)
+        #det = edge1.dot(pvec)
+        
+        pvec = np.cross(dir, edge2)
+        det = edge1.dot(pvec)
+        
+        if abs(det) < -0.000001 and det < 0.000001:
+            return None
+        inv_det = 1.0 / det
+        tvec = orig - self.a 
+        u = tvec.dot(pvec) * inv_det
+        if u < 0.0 or u > 1.0:  # if not intersection
+            return None
+
+        qvec = np.cross(tvec, edge1)
+        v = np.dot(dir, qvec)*inv_det
+        if v < 0.0 or u + v > 1.0:  # if not intersection
+            return None 
+
+        t = edge2.dot(qvec) * inv_det
+        if t > 0.000001 :
+            normal = normal /np.linalg.norm(normal)
+            hit = np.add(orig, t * np.array(dir))
+            return Intersect( distance = t,
+                      point = hit,
+                      normal = normal,
+                      texCoords = (u, v),
+                      sceneObj = self)
+                      
+        else: 
+            None
+   
+        
+        
 
 class AABB(object):
     # Axis Aligned Bounding Box
