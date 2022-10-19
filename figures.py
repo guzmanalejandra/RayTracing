@@ -135,9 +135,11 @@ class Triangle(object):
     #edge2 = v3 - v1
     #pvec = np.cross(ray_vec, edge2)
     #det = edge1.dot(pvec)
-    def ray(self, orig, dir): #def intersectionRayModel(self, rayStart, rayEnd):
-        edge1 = np.substract(self.b, self.a)
-        edge2 = np.substract(self.c, self.a)
+    def ray_intersect(self, orig, dir): #def intersectionRayModel(self, rayStart, rayEnd):
+        edge1 = np.subtract(self.b, self.a)
+        edge2 = np.subtract(self.c, self.a)
+        eps = -0.000001
+        epsi = 0.000001
         
         normal = np.cross(edge1, edge2)
         
@@ -146,11 +148,12 @@ class Triangle(object):
         
         pvec = np.cross(dir, edge2)
         det = edge1.dot(pvec)
+       
         
-        if abs(det) < -0.000001 and det < 0.000001:
+        if abs(det) < eps and det < epsi:
             return None
         inv_det = 1.0 / det
-        tvec = orig - self.a 
+        tvec = np.subtract(orig,self.a)
         u = tvec.dot(pvec) * inv_det
         if u < 0.0 or u > 1.0:  # if not intersection
             return None
@@ -161,17 +164,18 @@ class Triangle(object):
             return None 
 
         t = edge2.dot(qvec) * inv_det
-        if t > 0.000001 :
-            normal = normal /np.linalg.norm(normal)
-            hit = np.add(orig, t * np.array(dir))
+        if t > 0.000001:
+            pointo = np.add(orig, t * np.array(dir) )
+            normal = np.cross(edge1, edge2)
+            normal = normal / np.linalg.norm(normal) 
             return Intersect( distance = t,
-                      point = hit,
-                      normal = normal,
-                      texCoords = (u, v),
-                      sceneObj = self)
-                      
-        else: 
-            None
+                              point = pointo,
+                              normal = normal,
+                              texcoords = (u, v),
+                              sceneObj = self)
+
+        else:
+            return None
    
         
         
